@@ -4,70 +4,269 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Manutenção - IFMS Coxim</title>
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome para Ícones -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    .tab-active { border-bottom: 3px solid #059669; color: #059669; font-weight: bold; }
-    .status-badge { padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-    .status-pendente { background-color: #FEF3C7; color: #92400E; }
-    .status-andamento { background-color: #DBEAFE; color: #1E40AF; }
-    .status-concluido { background-color: #D1FAE5; color: #065F46; }
-    .status-impedido { background-color: #FEE2E2; color: #991B1B; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+    body { background-color: #f1f5f9; color: #334155; padding-bottom: 40px; }
+    header { background-color: #065f46; color: white; padding: 14px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header-content { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .logo-box { background: white; color: #065f46; font-weight: bold; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px; }
+    .nav-tabs { background: white; border-bottom: 1px solid #e2e8f0; display: flex; max-width: 800px; margin: 0 auto; }
+    .tab-btn { background: none; border: none; padding: 14px; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; width: 33.33%; text-align: center; }
+    .tab-btn.active { color: #059669; border-bottom-color: #059669; font-weight: bold; }
+    main { max-width: 800px; margin: 16px auto; padding: 0 12px; }
+    .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; display: inline-block; }
+    .badge-Pendente { background: #fef3c7; color: #92400e; }
+    .badge-Andamento { background: #dbeafe; color: #1e40af; }
+    .badge-Concluido { background: #d1fae5; color: #065f46; }
+    .badge-Impedido { background: #fee2e2; color: #991b1b; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; }
+    .btn { background: #059669; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; width: 100%; }
+    .btn-sm { width: auto; padding: 6px 12px; font-size: 12px; margin-left: 4px; }
+    .btn-blue { background: #2563eb; color: white; }
+    .btn-amber { background: #d97706; color: white; }
+    .btn-red { background: #dc2626; color: white; }
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+    .stat-card { background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center; }
+    .stat-val { font-size: 22px; font-weight: 800; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background: #f8fafc; font-weight: bold; }
+    .hidden { display: none !important; }
   </style>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen text-slate-800 pb-12">
+<body>
 
-  <!-- CABEÇALHO INSTITUCIONAL -->
-  <header class="bg-emerald-800 text-white shadow-lg sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <div class="bg-white text-emerald-800 font-bold p-2 rounded-lg text-lg flex items-center justify-center w-10 h-10 shadow">
-          IF
-        </div>
+  <header>
+    <div class="header-content">
+      <div style="display:flex; align-items:center;">
+        <div class="logo-box">IF</div>
         <div>
-          <h1 class="font-bold text-base md:text-lg leading-tight">IFMS Campus Coxim</h1>
-          <p class="text-xs text-emerald-200">Gestão de Ordens de Serviço (O.S.)</p>
+          <h1 style="font-size:16px;">IFMS Campus Coxim</h1>
+          <p style="font-size:11px; opacity:0.8;">Manutenção & Ordens de Serviço</p>
         </div>
       </div>
-      <button onclick="toggleView()" id="viewToggleBtn" class="bg-emerald-700 hover:bg-emerald-600 text-xs md:text-sm px-3 py-1.5 rounded-lg border border-emerald-500 transition flex items-center gap-2">
-        <i class="fa-solid fa-mobile-screen">
-        <span id="viewToggleText">Modo Técnico</span>
-      </button>
     </div>
   </header>
 
-  <!-- ABAS DE NAVEGAÇÃO -->
-  <div class="bg-white border-b shadow-sm">
-    <div class="max-w-5xl mx-auto flex justify-around text-sm text-slate-600">
-      <button onclick="switchTab('demandas')" id="tab-demandas" class="py-3 px-4 flex items-center gap-2 tab-active">
-        <i class="fa-solid fa-list-check">
-        <span>Demandas</span>
-      </button>
-      <button onclick="switchTab('nova')" id="tab-nova" class="py-3 px-4 flex items-center gap-2">
-        <i class="fa-solid fa-plus-circle">
-        <span>Nova O.S.</span>
-      </button>
-      <button onclick="switchTab('relatorio')" id="tab-relatorio" class="py-3 px-4 flex items-center gap-2">
-        <i class="fa-solid fa-chart-pie">
-        <span>Resumo / Relatório</span>
-      </button>
-    </div>
+  <div class="nav-tabs">
+    <button onclick="switchTab('demandas')" id="tab-demandas" class="tab-btn active">Demandas</button>
+    <button onclick="switchTab('nova')" id="tab-nova" class="tab-btn">Nova O.S.</button>
+    <button onclick="switchTab('relatorio')" id="tab-relatorio" class="tab-btn">Relatório</button>
   </div>
 
-  <main class="max-w-5xl mx-auto p-4 space-y-6">
+  <main>
+    <!-- LISTA DE DEMANDAS -->
+    <section id="sec-demandas">
+      <div id="listaDemandas"></div>
+    </section>
 
-    <!-- SEÇÃO: LISTA DE DEMANDAS -->
-    <section id="sec-demandas" class="space-y-4">
-      <!-- FILTROS -->
-      <div class="bg-white p-3 rounded-xl shadow-sm border flex flex-wrap gap-2 items-center justify-between">
-        <div class="flex gap-2 flex-1 min-w-[200px]">
-          <select id="filterStatus" onchange="renderDemandas()" class="text-xs p-2 rounded-lg border bg-slate-50 flex-1">
-            <option value="todos">Todos os Status</option>
-            <option value="Pendente">Pendente</option>
-            <option value="Em Andamento">Em Andamento</option>
-            <option value="Impedido/Pausado">Impedido/Pausado</option>
-            <option value="Concluído">Concluído</option>
-          </select>
-          <select id="filterBloco" onchange="render
+    <!-- NOVA OS -->
+    <section id="sec-nova" class="hidden">
+      <div class="card">
+        <h2 style="font-size:16px; margin-bottom:12px; color:#065f46;">Abrir Nova Ordem de Serviço</h2>
+        <form onsubmit="salvarNovaOS(event)">
+          <div class="form-group">
+            <label>Bloco *</label>
+            <select id="osBloco" required>
+              <option value="Bloco A">Bloco A</option>
+              <option value="Bloco B">Bloco B</option>
+              <option value="Bloco C">Bloco C</option>
+              <option value="Administrativo">Administrativo</option>
+              <option value="Quadra">Quadra Esportiva</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sala / Local *</label>
+            <input type="text" id="osSala" required placeholder="Ex: Sala 04, Banheiro">
+          </div>
+          <div class="form-group">
+            <label>Tipo de Serviço *</label>
+            <select id="osCategoria" required>
+              <option value="Elétrico">Elétrico</option>
+              <option value="Hidráulico">Hidráulico</option>
+              <option value="Pintura">Pintura</option>
+              <option value="Limpeza">Limpeza</option>
+              <option value="Manutenção Geral">Manutenção Geral</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Solicitante (Seu Nome) *</label>
+            <input type="text" id="osSolicitante" required placeholder="Ex: Prof. Carlos">
+          </div>
+          <div class="form-group">
+            <label>Resumo do Problema *</label>
+            <textarea id="osResumo" required rows="3" placeholder="Descreva brevemente o problema..."></textarea>
+          </div>
+          <button type="submit" class="btn">Enviar Ordem de Serviço</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- RELATÓRIO -->
+    <section id="sec-relatorio" class="hidden">
+      <div class="stats-grid">
+        <div class="stat-card"><div style="font-size:11px; color:#64748b;">Total</div><div id="statTotal" class="stat-val">0</div></div>
+        <div class="stat-card"><div style="font-size:11px; color:#059669;">Concluídas</div><div id="statConcluidas" class="stat-val">0</div></div>
+      </div>
+      <div class="card">
+        <button onclick="window.print()" class="btn btn-sm btn-blue" style="margin-bottom:12px; width:100%;">Imprimir / Salvar PDF</button>
+        <table>
+          <thead>
+            <tr><th>Data</th><th>Local</th><th>Serviço</th><th>Status</th></tr>
+          </thead>
+          <tbody id="tabelaRelatorio"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    var demandas = [
+      { id: 1, bloco: 'Bloco A', sala: 'Lab 03', categoria: 'Elétrico', solicitante: 'Prof. Ricardo', resumo: 'Tomadas sem energia.', status: 'Pendente', data: '04/11/2026', motivoPausa: '' },
+      { id: 2, bloco: 'Bloco B', sala: 'Banheiro', categoria: 'Hidráulico', solicitante: 'Coord. Ana', resumo: 'Torneira a pingar.', status: 'Concluído', data: '04/11/2026', motivoPausa: '' }
+    ];
+
+    function carregarDados() {
+      try {
+        var salvas = localStorage.getItem('ifms_demandas_v4');
+        if (salvas) {
+          var parsed = JSON.parse(salvas);
+          if (parsed && parsed.length > 0) demandas = parsed;
+        }
+      } catch(e) {}
+      salvarEAtualizar();
+    }
+
+    function salvarEAtualizar() {
+      try { localStorage.setItem('ifms_demandas_v4', JSON.stringify(demandas)); } catch(e) {}
+      renderDemandas();
+      renderRelatorio();
+    }
+
+    function switchTab(tab) {
+      document.getElementById('sec-demandas').className = 'hidden';
+      document.getElementById('sec-nova').className = 'hidden';
+      document.getElementById('sec-relatorio').className = 'hidden';
+
+      document.getElementById('tab-demandas').className = 'tab-btn';
+      document.getElementById('tab-nova').className = 'tab-btn';
+      document.getElementById('tab-relatorio').className = 'tab-btn';
+
+      document.getElementById('sec-' + tab).className = '';
+      document.getElementById('tab-' + tab).className = 'tab-btn active';
+    }
+
+    function renderDemandas() {
+      var container = document.getElementById('listaDemandas');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (demandas.length === 0) {
+        container.innerHTML = '<p style="text-align:center; padding:20px; color:#94a3b8;">Nenhuma ordem aberta.</p>';
+        return;
+      }
+
+      for (var i = 0; i < demandas.length; i++) {
+        var d = demandas[i];
+        var badgeType = d.status === 'Em Andamento' ? 'Andamento' : (d.status === 'Impedido/Pausado' ? 'Impedido' : (d.status === 'Concluído' ? 'Concluido' : 'Pendente'));
+        
+        var card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = 
+          '<div style="display:flex; justify-content:space-between; margin-bottom:8px;">' +
+            '<strong style="color:#065f46; font-size:13px;">' + d.bloco + ' - ' + d.sala + '</strong>' +
+            '<span class="badge badge-' + badgeType + '">' + d.status + '</span>' +
+          '</div>' +
+          '<p style="font-size:14px; font-weight:bold; margin-bottom:4px;">' + d.categoria + '</p>' +
+          '<p style="font-size:13px; color:#475569; background:#f8fafc; padding:8px; border-radius:6px; margin-bottom:8px;">' + d.resumo + '</p>' +
+          (d.motivoPausa ? '<p style="font-size:12px; color:#dc2626; margin-bottom:8px;"><strong>Pausa/Motivo:</strong> ' + d.motivoPausa + '</p>' : '') +
+          '<div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; align-items:center;">' +
+            '<span>' + d.solicitante + ' (' + d.data + ')</span>' +
+            '<div>' +
+              (d.status === 'Pendente' ? '<button onclick="mudarStatus(' + d.id + ', \'Em Andamento\')" class="btn btn-sm btn-blue">Iniciar</button>' : '') +
+              (d.status === 'Em Andamento' || d.status === 'Impedido/Pausado' ? '<button onclick="pausar(' + d.id + ')" class="btn btn-sm btn-amber">Motivo/Pausa</button><button onclick="mudarStatus(' + d.id + ', \'Concluído\')" class="btn btn-sm">Concluir</button>' : '') +
+              '<button onclick="excluir(' + d.id + ')" class="btn btn-sm btn-red">X</button>' +
+            '</div>' +
+          '</div>';
+        container.appendChild(card);
+      }
+    }
+
+    function salvarNovaOS(e) {
+      e.preventDefault();
+      var novo = {
+        id: Date.now(),
+        bloco: document.getElementById('osBloco').value,
+        sala: document.getElementById('osSala').value,
+        categoria: document.getElementById('osCategoria').value,
+        solicitante: document.getElementById('osSolicitante').value,
+        resumo: document.getElementById('osResumo').value,
+        status: 'Pendente',
+        data: new Date().toLocaleDateString('pt-BR'),
+        motivoPausa: ''
+      };
+      demandas.unshift(novo);
+      salvarEAtualizar();
+      switchTab('demandas');
+    }
+
+    function mudarStatus(id, st) {
+      for (var i = 0; i < demandas.length; i++) {
+        if (demandas[i].id === id) {
+          demandas[i].status = st;
+          break;
+        }
+      }
+      salvarEAtualizar();
+    }
+
+    function pausar(id) {
+      var m = prompt("Motivo de não realizar/pausar:");
+      if (m) {
+        for (var i = 0; i < demandas.length; i++) {
+          if (demandas[i].id === id) {
+            demandas[i].motivoPausa = m;
+            demandas[i].status = 'Impedido/Pausado';
+            break;
+          }
+        }
+        salvarEAtualizar();
+      }
+    }
+
+    function excluir(id) {
+      if (confirm("Excluir esta O.S.?")) {
+        demandas = demandas.filter(function(d) { return d.id !== id; });
+        salvarEAtualizar();
+      }
+    }
+
+    function renderRelatorio() {
+      var totalElem = document.getElementById('statTotal');
+      var conclElem = document.getElementById('statConcluidas');
+      var tb = document.getElementById('tabelaRelatorio');
+      
+      if (!totalElem || !conclElem || !tb) return;
+
+      totalElem.innerText = demandas.length;
+      var concCount = 0;
+      for (var i = 0; i < demandas.length; i++) {
+        if (demandas[i].status === 'Concluído') concCount++;
+      }
+      conclElem.innerText = concCount;
+
+      tb.innerHTML = '';
+      for (var j = 0; j < demandas.length; j++) {
+        var d = demandas[j];
+        tb.innerHTML += '<tr><td>' + d.data + '</td><td>' + d.bloco + ' - ' + d.sala + '</td><td>' + d.categoria + '</td><td>' + d.status + '</td></tr>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', carregarDados);
+    window.onload = carregarDados;
+  </script>
+</body>
+</html>

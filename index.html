@@ -20,6 +20,8 @@
     .badge-Andamento { background: #dbeafe; color: #1e40af; }
     .badge-Concluido { background: #d1fae5; color: #065f46; }
     .badge-Impedido { background: #fee2e2; color: #991b1b; }
+    .urgencia-urgente { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+    .urgencia-normal { background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
     .form-group { margin-bottom: 12px; }
     label { display: block; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 4px; }
     input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; }
@@ -28,13 +30,14 @@
     .btn-blue { background: #2563eb; color: white; }
     .btn-amber { background: #d97706; color: white; }
     .btn-red { background: #dc2626; color: white; }
-    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
     .stat-card { background: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center; }
-    .stat-val { font-size: 22px; font-weight: 800; }
+    .stat-val { font-size: 20px; font-weight: 800; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
     th, td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
     th { background: #f8fafc; font-weight: bold; }
     .hidden { display: none !important; }
+    .img-preview { max-width: 100%; max-height: 150px; border-radius: 8px; margin-top: 8px; border: 1px solid #cbd5e1; object-fit: cover; }
   </style>
 </head>
 <body>
@@ -69,37 +72,59 @@
         <h2 style="font-size:16px; margin-bottom:12px; color:#065f46;">Abrir Nova Ordem de Serviço</h2>
         <form onsubmit="salvarNovaOS(event)">
           <div class="form-group">
-            <label>Bloco *</label>
+            <label>Bloco / Local *</label>
             <select id="osBloco" required>
-              <option value="Bloco A">Bloco A</option>
-              <option value="Bloco B">Bloco B</option>
-              <option value="Bloco C">Bloco C</option>
-              <option value="Administrativo">Administrativo</option>
-              <option value="Quadra">Quadra Esportiva</option>
+              <option value="">Selecione o local...</option>
+              <option value="Bloco Administrativo">Bloco Administrativo</option>
+              <option value="Bloco de Ensino">Bloco de Ensino</option>
+              <option value="Bloco de Laboratórios">Bloco de Laboratórios</option>
+              <option value="Hotel Tecnológico">Hotel Tecnológico</option>
+              <option value="LAREN">LAREN</option>
+              <option value="Refeitório">Refeitório</option>
+              <option value="Área Externa / Quadra">Área Externa / Quadra</option>
             </select>
           </div>
+
           <div class="form-group">
-            <label>Sala / Local *</label>
-            <input type="text" id="osSala" required placeholder="Ex: Sala 04, Banheiro">
+            <label>Sala / Ambiente Específico *</label>
+            <input type="text" id="osSala" required placeholder="Ex: Sala 04, Cozinha, Banheiro">
           </div>
+
           <div class="form-group">
             <label>Tipo de Serviço *</label>
             <select id="osCategoria" required>
-              <option value="Elétrico">Elétrico</option>
-              <option value="Hidráulico">Hidráulico</option>
-              <option value="Pintura">Pintura</option>
-              <option value="Limpeza">Limpeza</option>
-              <option value="Manutenção Geral">Manutenção Geral</option>
+              <option value="Elétrico">⚡ Elétrico</option>
+              <option value="Hidráulico">💧 Hidráulico</option>
+              <option value="Pintura">🎨 Pintura</option>
+              <option value="Ar Condicionado">❄️ Ar Condicionado</option>
+              <option value="Limpeza">🧹 Limpeza</option>
+              <option value="Manutenção Geral">🛠️ Manutenção Geral</option>
             </select>
           </div>
+
+          <div class="form-group">
+            <label>Prioridade / Urgência *</label>
+            <select id="osUrgencia" required>
+              <option value="Normal">Normal</option>
+              <option value="Urgente">🚨 URGENTE</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label>Solicitante (Seu Nome) *</label>
             <input type="text" id="osSolicitante" required placeholder="Ex: Prof. Carlos">
           </div>
+
           <div class="form-group">
             <label>Resumo do Problema *</label>
             <textarea id="osResumo" required rows="3" placeholder="Descreva brevemente o problema..."></textarea>
           </div>
+
+          <div class="form-group">
+            <label>Foto do Problema (Opcional)</label>
+            <input type="file" id="osFoto" accept="image/*" capture="environment">
+          </div>
+
           <button type="submit" class="btn">Enviar Ordem de Serviço</button>
         </form>
       </div>
@@ -108,165 +133,14 @@
     <!-- RELATÓRIO -->
     <section id="sec-relatorio" class="hidden">
       <div class="stats-grid">
-        <div class="stat-card"><div style="font-size:11px; color:#64748b;">Total</div><div id="statTotal" class="stat-val">0</div></div>
-        <div class="stat-card"><div style="font-size:11px; color:#059669;">Concluídas</div><div id="statConcluidas" class="stat-val">0</div></div>
-      </div>
-      <div class="card">
-        <button onclick="window.print()" class="btn btn-sm btn-blue" style="margin-bottom:12px; width:100%;">Imprimir / Salvar PDF</button>
-        <table>
-          <thead>
-            <tr><th>Data</th><th>Local</th><th>Serviço</th><th>Status</th></tr>
-          </thead>
-          <tbody id="tabelaRelatorio"></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    var demandas = [
-      { id: 1, bloco: 'Bloco A', sala: 'Lab 03', categoria: 'Elétrico', solicitante: 'Prof. Ricardo', resumo: 'Tomadas sem energia.', status: 'Pendente', data: '04/11/2026', motivoPausa: '' },
-      { id: 2, bloco: 'Bloco B', sala: 'Banheiro', categoria: 'Hidráulico', solicitante: 'Coord. Ana', resumo: 'Torneira a pingar.', status: 'Concluído', data: '04/11/2026', motivoPausa: '' }
-    ];
-
-    function carregarDados() {
-      try {
-        var salvas = localStorage.getItem('ifms_demandas_v4');
-        if (salvas) {
-          var parsed = JSON.parse(salvas);
-          if (parsed && parsed.length > 0) demandas = parsed;
-        }
-      } catch(e) {}
-      salvarEAtualizar();
-    }
-
-    function salvarEAtualizar() {
-      try { localStorage.setItem('ifms_demandas_v4', JSON.stringify(demandas)); } catch(e) {}
-      renderDemandas();
-      renderRelatorio();
-    }
-
-    function switchTab(tab) {
-      document.getElementById('sec-demandas').className = 'hidden';
-      document.getElementById('sec-nova').className = 'hidden';
-      document.getElementById('sec-relatorio').className = 'hidden';
-
-      document.getElementById('tab-demandas').className = 'tab-btn';
-      document.getElementById('tab-nova').className = 'tab-btn';
-      document.getElementById('tab-relatorio').className = 'tab-btn';
-
-      document.getElementById('sec-' + tab).className = '';
-      document.getElementById('tab-' + tab).className = 'tab-btn active';
-    }
-
-    function renderDemandas() {
-      var container = document.getElementById('listaDemandas');
-      if (!container) return;
-      container.innerHTML = '';
-
-      if (demandas.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding:20px; color:#94a3b8;">Nenhuma ordem aberta.</p>';
-        return;
-      }
-
-      for (var i = 0; i < demandas.length; i++) {
-        var d = demandas[i];
-        var badgeType = d.status === 'Em Andamento' ? 'Andamento' : (d.status === 'Impedido/Pausado' ? 'Impedido' : (d.status === 'Concluído' ? 'Concluido' : 'Pendente'));
-        
-        var card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = 
-          '<div style="display:flex; justify-content:space-between; margin-bottom:8px;">' +
-            '<strong style="color:#065f46; font-size:13px;">' + d.bloco + ' - ' + d.sala + '</strong>' +
-            '<span class="badge badge-' + badgeType + '">' + d.status + '</span>' +
-          '</div>' +
-          '<p style="font-size:14px; font-weight:bold; margin-bottom:4px;">' + d.categoria + '</p>' +
-          '<p style="font-size:13px; color:#475569; background:#f8fafc; padding:8px; border-radius:6px; margin-bottom:8px;">' + d.resumo + '</p>' +
-          (d.motivoPausa ? '<p style="font-size:12px; color:#dc2626; margin-bottom:8px;"><strong>Pausa/Motivo:</strong> ' + d.motivoPausa + '</p>' : '') +
-          '<div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; align-items:center;">' +
-            '<span>' + d.solicitante + ' (' + d.data + ')</span>' +
-            '<div>' +
-              (d.status === 'Pendente' ? '<button onclick="mudarStatus(' + d.id + ', \'Em Andamento\')" class="btn btn-sm btn-blue">Iniciar</button>' : '') +
-              (d.status === 'Em Andamento' || d.status === 'Impedido/Pausado' ? '<button onclick="pausar(' + d.id + ')" class="btn btn-sm btn-amber">Motivo/Pausa</button><button onclick="mudarStatus(' + d.id + ', \'Concluído\')" class="btn btn-sm">Concluir</button>' : '') +
-              '<button onclick="excluir(' + d.id + ')" class="btn btn-sm btn-red">X</button>' +
-            '</div>' +
-          '</div>';
-        container.appendChild(card);
-      }
-    }
-
-    function salvarNovaOS(e) {
-      e.preventDefault();
-      var novo = {
-        id: Date.now(),
-        bloco: document.getElementById('osBloco').value,
-        sala: document.getElementById('osSala').value,
-        categoria: document.getElementById('osCategoria').value,
-        solicitante: document.getElementById('osSolicitante').value,
-        resumo: document.getElementById('osResumo').value,
-        status: 'Pendente',
-        data: new Date().toLocaleDateString('pt-BR'),
-        motivoPausa: ''
-      };
-      demandas.unshift(novo);
-      salvarEAtualizar();
-      switchTab('demandas');
-    }
-
-    function mudarStatus(id, st) {
-      for (var i = 0; i < demandas.length; i++) {
-        if (demandas[i].id === id) {
-          demandas[i].status = st;
-          break;
-        }
-      }
-      salvarEAtualizar();
-    }
-
-    function pausar(id) {
-      var m = prompt("Motivo de não realizar/pausar:");
-      if (m) {
-        for (var i = 0; i < demandas.length; i++) {
-          if (demandas[i].id === id) {
-            demandas[i].motivoPausa = m;
-            demandas[i].status = 'Impedido/Pausado';
-            break;
-          }
-        }
-        salvarEAtualizar();
-      }
-    }
-
-    function excluir(id) {
-      if (confirm("Excluir esta O.S.?")) {
-        demandas = demandas.filter(function(d) { return d.id !== id; });
-        salvarEAtualizar();
-      }
-    }
-
-    function renderRelatorio() {
-      var totalElem = document.getElementById('statTotal');
-      var conclElem = document.getElementById('statConcluidas');
-      var tb = document.getElementById('tabelaRelatorio');
-      
-      if (!totalElem || !conclElem || !tb) return;
-
-      totalElem.innerText = demandas.length;
-      var concCount = 0;
-      for (var i = 0; i < demandas.length; i++) {
-        if (demandas[i].status === 'Concluído') concCount++;
-      }
-      conclElem.innerText = concCount;
-
-      tb.innerHTML = '';
-      for (var j = 0; j < demandas.length; j++) {
-        var d = demandas[j];
-        tb.innerHTML += '<tr><td>' + d.data + '</td><td>' + d.bloco + ' - ' + d.sala + '</td><td>' + d.categoria + '</td><td>' + d.status + '</td></tr>';
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', carregarDados);
-    window.onload = carregarDados;
-  </script>
-</body>
-</html>
+        <div class="stat-card">
+          <div style="font-size:11px; color:#64748b;">Total de O.S.</div>
+          <div id="statTotal" class="stat-val">0</div>
+        </div>
+        <div class="stat-card" style="border-color:#a7f3d0; background:#f0fdf4;">
+          <div style="font-size:11px; color:#059669; font-weight:bold;">Realizadas</div>
+          <div id="statConcluidas" class="stat-val" style="color:#059669;">0</div>
+        </div>
+        <div class="stat-card" style="border-color:#fef08a; background:#fefce8;">
+          <div style="font-size:11px; color:#ca8a04; font-weight:bold;">Não Realizadas</div>
+          <div id="stat
